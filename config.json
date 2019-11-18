@@ -1,0 +1,6 @@
+{
+	"matrix_a":"./Files/test.csv",
+	"matrix_b":"./Files/test.csv",
+	"xlog_file_location":"",
+	"xoutput_file_location":""
+}
