@@ -1,16 +1,13 @@
 package main
 
-type input struct{
-	values []float64
-	target []float64
-	position int
-}
-
 type Config struct {
 	Matrix_A_Loc            string        `json:"matrix_a"`
 	Matrix_B_Loc            string        `json:"matrix_b"`
 	Output_File             string        `json:"output_file_location"`
 	Log_File                string        `json:"log_file_location"`
+	Tolerance               float64       `json:"tolerance"`
+	Max_Iterations          int           `json:"max_iterations"`
+	Max_Search_Directions   int           `json:"max_search_directions"`
 }
 
 func new_config() *Config {

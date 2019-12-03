@@ -19,57 +19,6 @@ import(
 
 var config *Config = new_config()
 
-// compresses a sparse matrix
-func compress_sparse_matrix(sparse_matrix [][]float64) [][]float64 {
-	var return_matrix [][]float64;
-	var data []float64
-	var row []float64
-	var col []float64
-	for i := 0; i < len(sparse_matrix); i++ {
-		for j := 0; j < len(sparse_matrix[i]); j++ {
-			if sparse_matrix[i][j] != 0 {
-				data = append(data, sparse_matrix[i][j])
-				if len(row) <= i {
-					for len(row) <= i {
-						row = append(row, float64(len(data) - 1))
-					}
-				}
-				col = append(col, float64(j))
-			}
-		}
-	}
-	if len(row) < len(sparse_matrix) {
-		for len(row) <= len(sparse_matrix) {
-			row = append(row, -1)
-		}
-	}
-	return_matrix = append(return_matrix, data)
-	return_matrix = append(return_matrix, append(row, float64(len(sparse_matrix))))
-	return_matrix = append(return_matrix, append(col, float64(len(sparse_matrix[0]))))
-	return return_matrix
-}
-
-func decompress_sparse_matrix(compressed_matrix [][]float64) [][]float64 {
-	var return_matrix [][]float64
-	row_len := int(compressed_matrix[1][len(compressed_matrix[1]) - 1])
-	col_len := int(compressed_matrix[2][len(compressed_matrix[2]) - 1])
-	current := 0
-	for i := 0; i < row_len; i++ {
-		var current_row []float64
-		active_row := compressed_matrix[1][i] != -1 && (len(compressed_matrix[1]) - 1 == i || compressed_matrix[1][i] != compressed_matrix[1][i + 1])
-		for j := 0; j < col_len; j++ {
-			if active_row && (i == row_len - 1 || compressed_matrix[1][i + 1] > float64(current)) && j == int(compressed_matrix[2][current]) {
-				current_row = append(current_row, compressed_matrix[0][current])
-				current++
-			} else {
-				current_row = append(current_row, 0)
-			}
-		}
-		return_matrix = append(return_matrix, current_row)
-	}
-	return return_matrix
-}
-
 // checks if a mtrix is sparse
 func is_sparse_matrix(check [][]float64) bool {
 	count := 0
@@ -95,12 +44,23 @@ func matrix_multiplication_check(A [][]float64, B [][]float64) bool {
 		return false
 	}
 }
+// Checks to see if two matricies are multiplicitive
+func CSR_matrix_multiplication_check(A CSR_Matrix, B CSR_Matrix) bool {
+	if A.col_len == B.row_len {
+		return true
+	} else {
+		return false
+	}
+}
 
 func are_matricies_equal(A [][]float64, B [][]float64) bool {
-	if len(A) != len(B) || len(A[0]) != len(B[0]) {
+	if len(A) != len(B) {
 		return false
 	}
 	for i := 0; i < len(A); i++ {
+		if len(A[i]) != len(B[i]) {
+			return false
+		}
 		for j := 0; j < len(A[0]); j++ {
 			if A[i][j] != B[i][j] {
 				return false
@@ -108,6 +68,78 @@ func are_matricies_equal(A [][]float64, B [][]float64) bool {
 		}
 	}
 	return true
+}
+
+func append_vector(A [][]float64, b []float64) [][]float64{
+	var return_vector [][]float64
+	for i := 0; i < len(b); i++ {
+		return_vector = append( return_vector, append(A[i], b[i]))
+	}
+	return return_vector
+}
+
+
+/*
+func add_two_matricies(A [][]float64, B [][]float64) [][]float64 {
+	row_len := int(A[1][len(A[1]) - 1])
+	col_len := int(A[2][len(A[2]) - 1])
+	var data []float64
+	var row []float64
+	var col []float64
+
+	a_index := 0
+	b_index := 0
+	for len(A[0]) < a_index || len(B[0] < b_index {
+		a_active_row := a[1][a_index] != -1 && (len(A[1]) - 1 == a_index || A[1][a_index] != A[1][a_index + 1])
+		b_active_row := a[1][b_index] != -1 && (len(B[1]) - 1 == b_index || B[1][b_index] != B[1][b_index + 1])
+		if a
+	}
+	row = append(row, row_len)
+	col = append(col, col_len)
+	return product
+}
+*/
+
+//********************************************************************
+// Name:	read_csv
+// Description: This function reads any csv file passed in, and puts
+//		it's data into an array of inputs. It also takes an 
+//		int that it uses to only pull a input one over that
+//		int times.
+// Return:	returns an array of the type input.
+//********************************************************************
+
+func load_vector_from_csv(file_location string) []float64 {
+	var return_vector []float64
+
+	log.Print("Reading data file ", file_location)
+	file, err := os.Open(file_location)
+	if err != nil {
+		log.Print("Error occured when opening ",
+			file_location, "\n", err)
+		os.Exit(-1)
+	}
+	reader := csv.NewReader(bufio.NewReader(file))
+	//a for loop that continues until it reaches the end of the file.
+	line, err := reader.Read()
+	//error check for the end of a file.
+	if err != nil {
+		log.Println("Error occured while reading through ",
+			    file_location + "\n\t\t", err)
+		os.Exit(-1)
+	}
+
+	//parse through each data_entry and adds it to the data point.
+	for i := 0; i < len(line); i++ {
+		data_entry, err := strconv.ParseFloat(line[i], 64)
+		if err != nil {
+			log.Print("Error occured while converting input in the csv input file.\n\t\t", err)
+			os.Exit(-1)
+		}
+		return_vector = append(return_vector,  data_entry)
+	}
+	log.Print("Finished loading all training data from memory.")
+	return return_vector
 }
 
 //********************************************************************
@@ -159,33 +191,6 @@ func load_matrix_from_csv(file_location string) [][]float64 {
 	return return_matrix
 }
 
-func multiply_compressed_matricies(A [][]float64, B [][]float64) [][]float64 {
-	A_col_len := int(A[2][len(A[2]) - 1])
-	A_row_len := int(A[1][len(A[1]) - 1])
-	B_row_len := int(B[1][len(B[1]) - 1])
-	var product [][]float64
-	for i := 0; i < A_col_len; i++ {
-		var new_row []float64
-		for j := 0; j < B_row_len; j++ {
-			new_row = append(new_row, 0)
-		}
-		product = append(product, new_row)
-	}
-	a_row := 0
-	for i := 0; i < len(A[0]); i++ {
-		for (A[1][a_row] == -1 || i == int(A[1][a_row + 1])) && A_row_len != a_row {
-			a_row++
-		}
-		for b_row := 0; b_row < B_row_len; b_row++ {
-			for j := int(B[1][b_row]); j < len(B[0]) && j != -1 && (len(B[1]) - 1 == b_row || j < int(B[1][b_row + 1])); j++ {
-				if a_row == int(B[2][j]) {
-					product[b_row][int(A[2][i])] += A[0][i] * B[0][j]
-				}
-			}
-		}
-	}
-	return product
-}
 
 //********************************************************************
 // Name:	setup_log
@@ -200,9 +205,11 @@ func setup_log () {
 		}
 		log.SetOutput(log_file)
 	}
+	log.Print("Starting Up")
 }
 
 func main() {
+	// Read config from input
 	var configPathFlag = flag.String("config", "./config.json", "path to configuration file")
 	flag.Parse()
 	if len(*configPathFlag) > 0 {
@@ -218,20 +225,16 @@ func main() {
 		}
 	}
 	setup_log()
-	log.Print("Starting Up")
 	log.Print("Using config file ", *configPathFlag)
 
-	A := load_matrix_from_csv("./Matrix a.csv")
-	I := load_matrix_from_csv("./Matrix b.csv")
+	A := load_matrix_from_csv(config.Matrix_A_Loc)
+	b := load_vector_from_csv(config.Matrix_B_Loc)
 	cA := compress_sparse_matrix(A)
-	cI := compress_sparse_matrix(I)
-	fmt.Println(cA)
-	fmt.Println(cI)
-	C := multiply_compressed_matricies(cA, cI)
-	fmt.Println(are_matricies_equal(A, C))
-	for i := 0; i < len(A); i++ {
-		fmt.Println(A[i])
-		fmt.Println(C[i])
-		fmt.Println()
-	}
+
+	cA.Print()
+	fmt.Println(b)
+
+	Z := cA.Times_vector(b)
+
+	fmt.Println(Z)
 }

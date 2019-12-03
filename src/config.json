@@ -1,0 +1,9 @@
+{
+	"matrix_a":"../files/Matrix_a.csv",
+	"matrix_b":"../files/Matrix_c.csv",
+	"tolerance":0.000001,
+	"max_iterations":50,
+	"max_search_directions":50,
+	"log_file_location":"../logs/Sparse_Matrix_Operations.log",
+	"output_file_location":"./Sparse_Matrix_Operations.txt"
+}
