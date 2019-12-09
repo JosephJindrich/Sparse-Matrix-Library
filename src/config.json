@@ -1,9 +1,14 @@
 {
-	"matrix_a":"../files/Matrix_a.csv",
-	"matrix_b":"../files/Matrix_c.csv",
+	"xmatrix_a":"../files/pores_1.mtx",
+	"matrix_a":"../files/662_bus.mtx",
+	"xmatrix_a":"../files/tri_matrix.mtx",
+	"mtx_file":true,
+	"xmatrix_b":"../files/Matrix_a.csv",
+	"matrix_b":"../files/Tridiagonal Matrix - Sheet1.csv",
 	"tolerance":0.000001,
-	"max_iterations":50,
-	"max_search_directions":50,
+	"max_iterations":1000,
+	"max_workers":200,
+	"max_search_directions":100,
 	"log_file_location":"../logs/Sparse_Matrix_Operations.log",
 	"output_file_location":"./Sparse_Matrix_Operations.txt"
 }
